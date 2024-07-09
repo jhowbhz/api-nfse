@@ -22,22 +22,25 @@ class Client {
     setClient(){
         soap.createClient(url, {
             wsdl_options: {
+                cert: fs.readFileSync('./certs/certificado.pem'), // Certificado PEM
+                key: fs.readFileSync('./certs/chave_privada.pem'), // Chave privada PEM
                 pfx: fs.readFileSync(process.env.PATH_CERT),
                 passphrase: process.env.PWD_CERT,
-                strictSSL: true 
+                strictSSL: true
             }
         }, (error, client) => {
-            
-            if(error) {
-                console.log(error);
-                return error;
+            if (error) {
+                console.error('Error creating SOAP client:', error.message);
+                if (error.response) {
+                    console.error('Response data:', error.response.data);
+                    console.error('Response status:', error.response.status);
+                }
+                return;
             }
-
-            client.setSecurity(new soap.ClientSSLSecurityPFX(process.env.PATH_CERT,  process.env.PWD_CERT));
+        
             this.client = client;
-
-            console.log(`SOAP ${ mode == 1 ? 'Production' : 'Dev' } Connected - ${url}`)
-        })
+            console.log(`SOAP ${mode == 1 ? 'Production' : 'Dev'} Connected - ${url}`);
+        });
     }
 
 }
