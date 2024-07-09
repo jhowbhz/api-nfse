@@ -1,47 +1,39 @@
 const soap = require('soap');
 const fs = require('fs');
-const mode = process.env.API_MODE ;
+const mode = process.env.API_MODE;
 let url;
 
 switch (mode) {
     case "1":
-        url = process.env.BHISS_URL_PROD
+        url = process.env.BHISS_URL_PROD;
         break;
     case "2":
-        url = process.env.BHISS_URL_DEV
+        url = process.env.BHISS_URL_DEV;
         break;
 }
 
-
 class Client {
-    
-    constructor(){ 
-        this.client = null
+    constructor() {
+        this.client = null;
     }
 
-    setClient(){
+    setClient() {
         soap.createClient(url, {
             wsdl_options: {
                 pfx: fs.readFileSync(process.env.PATH_CERT),
-                cert: fs.readFileSync(process.env.PATH_CERT_PEM),          // Certificado
-                key: fs.readFileSync(process.env.PATH_CERT_KEY),           // Chave do certificado
                 passphrase: process.env.PWD_CERT,
-                strictSSL: true 
+                strictSSL: true
             }
         }, (error, client) => {
-            
-            if(error) {
-                console.log(error);
-                return error;
+            if (error) {
+                console.error('Error creating SOAP client:', error);
+                return;
             }
 
-            client.setSecurity(new soap.ClientSSLSecurityPFX(process.env.PATH_CERT,  process.env.PWD_CERT));
             this.client = client;
-
-            console.log(`SOAP ${ mode == 1 ? 'Production' : 'Dev' } Connected - ${url}`)
-        })
+            console.log(`SOAP ${mode == 1 ? 'Production' : 'Dev'} Connected - ${url}`);
+        });
     }
-
 }
 
 module.exports = new Client();
