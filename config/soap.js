@@ -1,6 +1,16 @@
 const soap = require('soap');
 const fs = require('fs');
-const url = process.env.BHISS_URL_PROD; // URL diretamente de acordo com o modo
+const mode = process.env.API_MODE;
+let url;
+
+switch (mode) {
+    case "1":
+        url = process.env.BHISS_URL_PROD;
+        break;
+    case "2":
+        url = process.env.BHISS_URL_DEV;
+        break;
+}
 
 class Client {
     constructor() {
@@ -8,50 +18,23 @@ class Client {
     }
 
     setClient() {
-        console.log(`Trying to create SOAP client for URL: ${url}`);
-
-        const options = {
-            endpoint: url,
+        soap.createClient(url, {
             wsdl_options: {
-                cert: fs.readFileSync(process.env.PATH_CERT_PEM), // Certificado PEM
-                key: fs.readFileSync(process.env.PATH_CERT_KEY), // Chave do certificado
-                passphrase: process.env.PWD_CERT, // Senha do certificado
+                pfx: fs.readFileSync(process.env.PATH_CERT),           // Certificado
+                cert: fs.readFileSync(process.env.PATH_CERT_PEM),          // Certificado
+                key: fs.readFileSync(process.env.PATH_CERT_KEY),           // Chave do certificado
+                passphrase: process.env.PWD_CERT,                     // Senha do certificado
                 strictSSL: true,
                 securityOptions: 'SSL_OP_NO_SSLv3' // Opção para desativar SSLv3
             }
-        };
-
-        console.log('SOAP Client Options:', options);
-
-        soap.createClient(url, options, (error, client) => {
+        }, (error, client) => {
             if (error) {
-                console.error('Error creating SOAP client:', error.message);
-                if (error.response) {
-                    console.error('Response data:', error.response.data);
-                    console.error('Response status:', error.response.status);
-                }
-                if (error.stack) {
-                    console.error('Error stack:', error.stack);
-                }
-                console.error('Error code:', error.code); // Adicionando código de erro
-                console.error('Error config:', error.config); // Exibindo configuração que causou o erro
-                console.error('Error detail:', error.detail); // Adicionando detalhes específicos do erro, se disponível
+                console.error('Error creating SOAP client:', error);
                 return;
             }
 
             this.client = client;
-            console.log(`SOAP Client connected to ${url}`);
-
-            // Capturar eventos do cliente SOAP, se necessário
-            if (client) {
-                client.on('request', (req) => {
-                    console.log('Request headers:', req.headers); // Mostra os cabeçalhos da requisição SOAP
-                    console.log('Request body:', req.body); // Mostra o corpo da requisição SOAP, se aplicável
-                }).on('response', (res) => {
-                    console.log('Response headers:', res.headers); // Mostra os cabeçalhos da resposta SOAP
-                    console.log('Response body:', res.body); // Mostra o corpo da resposta SOAP, se aplicável
-                });
-            }
+            console.log(`SOAP ${mode == 1 ? 'Production' : 'Dev'} Connected - ${url}`);
         });
     }
 }
