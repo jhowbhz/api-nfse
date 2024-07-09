@@ -22,12 +22,19 @@ class Client {
     }
 
     setClient() {
-        // Caminhos para os arquivos PFX e PEM
-        const pfxFile = process.env.PATH_CERT;
-        const pemFile = 'certs/certificado.pem'; // Caminho onde o arquivo PEM será salvo
+        const certFile = process.env.PATH_CERT;
 
-        // Converter PFX para PEM se necessário
-        this.convertPfxToPem(pfxFile, pemFile);
+        // Verificar se o arquivo é PFX ou PEM
+        if (certFile.endsWith('.pfx') || certFile.endsWith('.PFX')) {
+            // Se for PFX, converter para PEM e então configurar o cliente SOAP
+            const pemFile = 'certs/certificado.pem';
+            this.convertPfxToPem(certFile, pemFile);
+        } else if (certFile.endsWith('.pem') || certFile.endsWith('.PEM')) {
+            // Se já for PEM, configurar diretamente o cliente SOAP
+            this.setSoapClient(certFile);
+        } else {
+            throw new Error('Unsupported certificate format. Supported formats: PFX, PEM.');
+        }
     }
 
     convertPfxToPem(pfxFile, pemFile) {
@@ -44,12 +51,10 @@ class Client {
         });
     }
 
-    setSoapClient(pemFile) {
+    setSoapClient(certFile) {
         soap.createClient(url, {
             options: {
-                pfx: fs.readFileSync(process.env.PATH_CERT),
-                cert: fs.readFileSync(pemFile), // Certificado PEM
-                key: fs.readFileSync(pemFile), // Chave privada PEM
+                pfx: fs.readFileSync(certFile), // PFX ou PEM
                 passphrase: process.env.PWD_CERT, // Senha do certificado
                 strictSSL: true
             }
