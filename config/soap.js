@@ -10,6 +10,8 @@ switch (mode) {
     case "2":
         url = process.env.BHISS_URL_DEV;
         break;
+    default:
+        throw new Error(`Mode ${mode} not supported.`);
 }
 
 class Client {
