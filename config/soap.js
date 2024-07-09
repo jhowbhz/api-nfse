@@ -46,7 +46,7 @@ class Client {
 
     setSoapClient(pemFile) {
         soap.createClient(url, {
-            wsdl_options: {
+            options: {
                 pfx: fs.readFileSync(process.env.PATH_CERT),
                 cert: fs.readFileSync(pemFile), // Certificado PEM
                 key: fs.readFileSync(pemFile), // Chave privada PEM
