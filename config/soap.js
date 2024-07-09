@@ -23,7 +23,8 @@ class Client {
                 cert: fs.readFileSync(process.env.PATH_CERT_PEM),          // Certificado
                 key: fs.readFileSync(process.env.PATH_CERT_KEY),           // Chave do certificado
                 passphrase: process.env.PWD_CERT,                     // Senha do certificado
-                strictSSL: true                       
+                strictSSL: true,
+                securityOptions: 'SSL_OP_NO_SSLv3' // Opção para desativar SSLv3
             }
         }, (error, client) => {
             if (error) {
