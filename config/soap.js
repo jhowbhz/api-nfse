@@ -23,7 +23,6 @@ class Client {
                 pfx: fs.readFileSync(process.env.PATH_CERT),
                 passphrase: process.env.PWD_CERT,
                 strictSSL: true,
-                secureOptions: require('constants').SSL_OP_NO_SSLv3 | require('constants').SSL_OP_NO_TLSv1 // Evita SSLv3 e TLSv1
             }
         }, (error, client) => {
             if (error) {
