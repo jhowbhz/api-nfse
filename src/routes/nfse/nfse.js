@@ -148,7 +148,10 @@ module.exports = (app) => {
             }
             res.json(result)
         } catch (error) {
-            res.json({ error: true, message: 'Ocorreu alguma falha com a comunicação do webservice soap.' })
+
+            console.log(error)
+
+            res.json({ error: true, message: 'Ocorreu alguma falha com a comunicação do webservice soap.', data: JSON.stringify(error) })
         }
     })
 
